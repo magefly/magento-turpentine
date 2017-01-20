@@ -1114,11 +1114,9 @@ sub vcl_synth {
             // set the vcl_error from Magento database
             $vars['vcl_synth'] = $this->_vcl_sub_synth();
         }
-
         if (Mage::getStoreConfig('turpentine_varnish/general/https_proto_fix')) {
             $vars['https_proto_fix'] = $this->_vcl_sub_https_proto_fix();
         }
-
         if (Mage::getStoreConfig('turpentine_varnish/general/https_redirect_fix')) {
             $vars['https_redirect'] = $this->_vcl_sub_https_redirect_fix();
             if (Mage::getStoreConfig('turpentine_varnish/servers/version') == '4.0' || Mage::getStoreConfig('turpentine_varnish/servers/version') == '4.1') {
