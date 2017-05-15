@@ -365,6 +365,7 @@ sub vcl_backend_response {
             if (beresp.http.X-Turpentine-Esi == "1") {
                 set beresp.do_esi = true;
             }
+
             if (beresp.http.X-Turpentine-Cache == "0") {
                 set beresp.ttl = {{grace_period}}s;
                 set beresp.uncacheable = true;
