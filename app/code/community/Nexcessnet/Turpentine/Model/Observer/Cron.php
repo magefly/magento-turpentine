@@ -95,18 +95,21 @@ class Nexcessnet_Turpentine_Model_Observer_Cron extends Varien_Event_Observer {
      * @param  string $url
      * @return bool
      */
-    protected function _crawlUrl($url) {
-        $client = Mage::helper('turpentine/cron')->getCrawlerClient();
-        $client->setUri($url);
-        Mage::helper('turpentine/debug')->logDebug('Crawling URL: %s', $url);
-        try {
-            $response = $client->request();
-        } catch (Exception $e) {
-            Mage::helper('turpentine/debug')->logWarn(
-                'Error crawling URL (%s): %s',
-                $url, $e->getMessage() );
-            return false;
-        }
-        return $response->isSuccessful();
-    }
+	protected function _crawlUrl($url) {
+		$client = Mage::helper('turpentine/cron')->getCrawlerClient();
+		$client->setUri($url);
+		$mobileClient = Mage::helper('turpentine/cron')->getMobileCrawlerClient();
+		$mobileClient->setUri($url);
+		Mage::helper('turpentine/debug')->logCrawlDebug('Crawling URL (mobile|desktop): %s', $url);
+		try {
+			$response = $client->request();
+			$response = $mobileClient->request();
+		} catch (Exception $e) {
+			Mage::helper('turpentine/debug')->logWarn(
+				'Error crawling URL (%s): %s',
+				$url, $e->getMessage() );
+			return false;
+		}
+		return $response->isSuccessful();
+	}
 }
