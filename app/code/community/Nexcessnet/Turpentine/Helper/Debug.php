@@ -99,6 +99,23 @@ class Nexcessnet_Turpentine_Helper_Debug extends Mage_Core_Helper_Abstract {
         return $this->_log(Zend_Log::DEBUG, $message);
     }
 
+	/**
+	 * Logs crawl debug.
+	 *
+	 * @param $message
+	 * @return string
+	 */
+	public function logCrawlDebug($message)
+	{
+
+		if (func_num_args() > 1) {
+			$message = $this->_prepareLogMessage(func_get_args());
+		}
+		$message = 'TURPENTINE: '.$message;
+		Mage::log($message, Zend_Log::DEBUG, 'warmcache.log', true);
+		return $message;
+	}
+
     /**
      * Prepares advanced log message.
      *
