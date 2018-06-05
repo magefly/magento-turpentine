@@ -121,6 +121,14 @@ sub vcl_recv {
             set req.http.X-Forwarded-For = client.ip;
         }
     }
+    # We add custom php files
+    if (req.url ~ "shipping_rate.php|hash.php|product_like.php|ajax.php|fiyat.php" || req.url ~ "(?Ui)^/external/") {
+    return (pass);
+    }
+
+    if (req.method == "POST") {
+        return (pass);
+    }
 
     # We only deal with GET and HEAD by default
     # we test this here instead of inside the url base regex section
