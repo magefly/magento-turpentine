@@ -787,6 +787,8 @@ EOS;
     protected function _vcl_sub_normalize_user_agent() {
 
         $mobileRegexp = $this->_getMobileUserAgentRegex();
+		$additionalUserAgentRegexp = $this->_getAdditionalUserAgentRegex();
+		$additionalUserAgent2Regexp = $this->_getAdditionalUserAgent2Regex();
         $tpl = <<<EOS
 set req.http.X-Normalized-User-Agent = "other";
 EOS;
@@ -801,6 +803,28 @@ $tplContent
 EOS;
 
         }
+		if(!empty($additionalUserAgentRegexp)){
+			$tplContent = '
+            if (req.http.User-Agent ~ "'.$additionalUserAgentRegexp.'") {
+        set req.http.X-Normalized-User-Agent = "mobile";
+    }';
+
+			$tpl .= <<<"EOS"
+$tplContent
+EOS;
+
+		}
+		if(!empty($additionalUserAgent2Regexp)){
+			$tplContent = '
+            if (req.http.User-Agent ~ "'.$additionalUserAgent2Regexp.'") {
+        set req.http.X-Normalized-User-Agent = "mobile";
+    }';
+
+			$tpl .= <<<"EOS"
+$tplContent
+EOS;
+
+		}
 
         return $tpl;
     }
@@ -870,6 +894,26 @@ EOS;
         return trim(Mage::getStoreConfig(
             'turpentine_vcl/normalization/user_agent_mobile_regexp' ));
     }
+
+	/**
+	 * Get the regex for additional user agent
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgentRegex() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional_regexp' ));
+	}
+
+	/**
+	 * Get the regex for additional2 user agent
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgent2Regex() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional2_regexp' ));
+	}
 
     /**
      * Get the allowed IPs when in maintenance mode
