@@ -168,11 +168,11 @@ class Nexcessnet_Turpentine_Model_Observer_Ban extends Varien_Event_Observer {
      * @param  Varien_Object $eventObject
      * @return null
      */
-    public function banMediaCache( $eventObject ) {
-        if( Mage::helper( 'turpentine/varnish' )->getVarnishEnabled() ) {
-            $result = $this->_getVarnishAdmin()->flushUrl( 'media/(?:js|css)/' );
-            Mage::dispatchEvent( 'turpentine_ban_media_cache', $result );
-            $this->_checkResult( $result );
+    public function banMediaCache($eventObject) {
+        if (Mage::helper('turpentine/varnish')->getVarnishEnabled()) {
+            $result = $this->_getVarnishAdmin()->flushUrl('media/(?:js|css)/');
+            Mage::dispatchEvent('turpentine_ban_media_cache', $result);
+            $this->_checkResult($result);
         }
     }
 
@@ -297,16 +297,15 @@ class Nexcessnet_Turpentine_Model_Observer_Ban extends Varien_Event_Observer {
      * @param  Varien_Object $eventObject
      * @return bool
      */
-    public function banProductReview( $eventObject ) {
-        if ( Mage::helper( 'turpentine/varnish' )->getVarnishEnabled() ) {
-            $patterns = array();
-            /* @var $review \Mage_Review_Model_Review */
-            $review = $eventObject->getObject();
-
-            /* @var $productCollection \Mage_Review_Model_Resource_Review_Product_Collection */
-            $productCollection = $review->getProductCollection();
-
-            $products = $productCollection->addEntityFilter((int)$review->getEntityPkValue())->getItems();
+    public function banProductReview($eventObject) {
+        if ( Mage::helper( 'turpentine/varnish' )->getVarnishEnabled() ) {$patterns = array();
+        /* @var $review \Mage_Review_Model_Review*/
+        $review = $eventObject->getObject();
+        
+        /* @var $productCollection \Mage_Review_Model_Resource_Review_Product_Collection*/
+        $productCollection = $review->getProductCollection();
+        
+        $products = $productCollection->addEntityFilter((int) $review->getEntityPkValue())->getItems();
 
             $productIds = array_unique(array_map(
                 create_function('$p', 'return $p->getEntityId();'),
