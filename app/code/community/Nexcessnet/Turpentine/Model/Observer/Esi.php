@@ -541,45 +541,29 @@ class Nexcessnet_Turpentine_Model_Observer_Esi extends Varien_Event_Observer {
         return ! $this->_checkIsNotEsiUrl($url);
     }
 
-    public function hookToControllerActionPreDispatch($observer) {
-        if (Mage::helper('turpentine/data')->getVclFix() == 0 && $observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add') {
-            Mage::dispatchEvent("add_to_cart_before", array('request' => $observer->getControllerAction()->getRequest()));
-        }
-        if ($observer->getEvent()->getControllerAction()->getFullActionName() == 'wishlist_index_index') {
-            Mage::dispatchEvent('wishlist_index_index_before', array('request' => $observer->getControllerAction()->getRequest()));
-        }
-    }
-
-    public function hookToControllerActionPostDispatch($observer) {
-        if ($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add') {
-            Mage::dispatchEvent("add_to_cart_after", array('request' => $observer->getControllerAction()->getRequest()));
-        }
-    }
-    
+    /**
+     * Add form key on add-to-cart, unless VCL fix is enabled
+     * @param  $observer
+     * @return Nexcessnet_Turpentine_Model_Observer_Esi
+     */
     public function hookToAddToCartBefore($observer) {
-        //Mage::log("hookToAddToCartBefore-antes ".print_r($observer->getEvent()->getRequest()->getParams(),true)." will be added to cart.", null, 'carrinho.log', true);
-        $key = Mage::getSingleton('core/session')->getFormKey();
-        $observer->getEvent()->getRequest()->setParam('form_key', $key);
-        $request = $observer->getEvent()->getRequest()->getParams();
-        //Mage::log("hookToAddToCartBefore ".print_r($request,true)." will be added to cart.", null, 'carrinho.log', true);
-    }
-
-    public function hookToAddToCartAfter($observer) {
-        $request = $observer->getEvent()->getRequest()->getParams();
-        //Mage::log("hookToAddToCartAfter ".print_r($request,true)." is added to cart.", null, 'carrinho.log', true);
+        if (Mage::helper('turpentine/data')->getVclFix() == 0) {
+            $key = Mage::getSingleton('core/session')->getFormKey();
+            $observer->getControllerAction()->getRequest()->setParam('form_key', $key);
+        }
+        return $this;
     }
 
     /**
-     * Set the form key on the add to wishlist request
+     * Add the form key to the wishlist page request
      *
      * @param $observer
-     *
      * @return Nexcessnet_Turpentine_Model_Observer_Esi
      */
     public function hookToAddToWishlistBefore($observer)
     {
         $key = Mage::getSingleton('core/session')->getFormKey();
-        $observer->getEvent()->getRequest()->setParam('form_key', $key);
+        $observer->getControllerAction()->getRequest()->setParam('form_key', $key);
         return $this;
     }
 }

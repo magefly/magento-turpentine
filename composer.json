@@ -10,9 +10,6 @@
             "email": "aheadley@nexcess.net"
         }
     ],
-    "replace": {
-        "connect20/nexcessnet_turpentine": "self.version"
-    },
     "require": {
         "magento-hackathon/magento-composer-installer": "*"
     }
