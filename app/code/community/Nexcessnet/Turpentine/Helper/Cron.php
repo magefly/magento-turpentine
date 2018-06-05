@@ -35,6 +35,12 @@ class Nexcessnet_Turpentine_Helper_Cron extends Mage_Core_Helper_Abstract {
      */
     protected $_crawlerClient = null;
 
+	/**
+	 * Mobile Crawler client singleton
+	 *
+	 * @var Varien_Http_Client
+	 */
+	protected $_mobileCrawlerClient = null;
     /**
      * Get the execution time used so far
      *
@@ -113,19 +119,38 @@ class Nexcessnet_Turpentine_Helper_Cron extends Mage_Core_Helper_Abstract {
      *
      * @return Varien_Http_Client
      */
-    public function getCrawlerClient() {
-        if (is_null($this->_crawlerClient)) {
-            $this->_crawlerClient = new Varien_Http_Client(null, array(
-                'useragent'     => sprintf(
-                    'Nexcessnet_Turpentine/%s Magento/%s Varien_Http_Client',
-                    Mage::helper('turpentine/data')->getVersion(),
-                    Mage::getVersion() ),
-                'keepalive'     => true,
-            ));
-            $this->_crawlerClient->setCookie('frontend', 'crawler-session');
-        }
-        return $this->_crawlerClient;
-    }
+	public function getCrawlerClient() {
+		if (is_null($this->_crawlerClient)) {
+			$this->_crawlerClient = new Varien_Http_Client(null, array(
+				'useragent'     => sprintf(
+					'Nexcessnet_Turpentine/%s Magento/%s Varien_Http_Client',
+					Mage::helper('turpentine/data')->getVersion(),
+					Mage::getVersion() ),
+				'keepalive'     => true,
+			));
+			$this->_crawlerClient->setCookie('frontend', 'crawler-session');
+		}
+		return $this->_crawlerClient;
+	}
+
+	/**
+	 * Get the crawler http client for mobile
+	 *
+	 * @return Varien_Http_Client
+	 */
+	public function getMobileCrawlerClient() {
+		if (is_null($this->_mobileCrawlerClient)) {
+			$this->_mobileCrawlerClient = new Varien_Http_Client(null, array(
+				'useragent'     => sprintf(
+					'Nexcessnet_Turpentine_Mobile/iPhone %s Magento/%s Varien_Http_Client',
+					Mage::helper('turpentine/data')->getVersion(),
+					Mage::getVersion() ),
+				'keepalive'     => true,
+			));
+			$this->_mobileCrawlerClient->setCookie('frontend', 'crawler-session');
+		}
+		return $this->_mobileCrawlerClient;
+	}
 
     /**
      * Get if the crawler is enabled

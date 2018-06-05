@@ -121,11 +121,19 @@ sub vcl_recv {
             set req.http.X-Forwarded-For = client.ip;
         }
     }
+    # We add custom php files
+    if (req.url ~ "shipping_rate.php|hash.php|product_like.php|ajax.php|fiyat.php" || req.url ~ "(?Ui)^/external/") {
+    return (pass);
+    }
+
+    if (req.method == "POST") {
+        return (pass);
+    }
 
     # We only deal with GET and HEAD by default
     # we test this here instead of inside the url base regex section
     # so we can disable caching for the entire site if needed
-    if (!{{enable_caching}} || req.http.Authorization ||
+    if (!{{enable_caching}} ||
         req.method !~ "^(GET|HEAD|OPTIONS)$" ||
         req.http.Cookie ~ "varnish_bypass={{secret_handshake}}") {
         return (pipe);
@@ -306,7 +314,11 @@ sub vcl_hash {
         {{advanced_session_validation}}
 
     }
-    
+    if (req.http.X-Varnish-Esi-Access == "customer_group" &&
+            req.http.Cookie ~ "customer_group=") {
+        hash_data(regsub(req.http.Cookie, "^.*?customer_group=([^;]*);*.*$", "\1"));
+    }
+
     if (req.http.X-Varnish-Esi-Access == "customer_group" &&
             req.http.Cookie ~ "customer_group=") {
         hash_data(regsub(req.http.Cookie, "^.*?customer_group=([^;]*);*.*$", "\1"));
@@ -433,8 +445,10 @@ sub vcl_deliver {
                     set resp.http.Set-Cookie = resp.http.Set-Cookie +
                     "; domain={{normalize_cookie_target}}";
                 } else {
+                    set resp.http.X-Varnish-CookieDomain = regsub(req.http.Host, ":\d+$", "");
+{{set_cookie_domain}}
                     set resp.http.Set-Cookie = resp.http.Set-Cookie +
-                    "; domain=" + regsub(req.http.Host, ":\d+$", "");
+                    "; domain=" + resp.http.X-Varnish-CookieDomain;
                 }
             }
         }
@@ -464,6 +478,7 @@ sub vcl_deliver {
         unset resp.http.X-Varnish-Session;
         unset resp.http.X-Varnish-Host;
         unset resp.http.X-Varnish-URL;
+        unset resp.http.X-Varnish-CookieDomain;
         # this header indicates the session that originally generated a cached
         # page. it *must* not be sent to a client in production with lax
         # session validation or that session can be hijacked

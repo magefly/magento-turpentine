@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Nexcess.net Turpentine Extension for Magento
  * Copyright (C) 2012  Nexcess.net L.L.C.
@@ -18,11 +17,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
-
     const VCL_CUSTOM_C_CODE_FILE = 'uuid.c';
-
     /**
      * Get the correct version of a configurator from a socket
      *
@@ -44,7 +40,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
                 return Mage::getModel(
                     'turpentine/varnish_configurator_version4',
                     array('socket' => $socket) );
-
             case '3.0':
                 return Mage::getModel(
                     'turpentine/varnish_configurator_version3',
@@ -57,7 +52,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
                 Mage::throwException('Unsupported Varnish version');
         }
     }
-
     /**
      * The socket this configurator is based on
      *
@@ -72,14 +66,11 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
     protected $_options = array(
         'vcl_template'  => null,
     );
-
     public function __construct($options = array()) {
         $this->_options = array_merge($this->_options, $options);
     }
-
     abstract public function generate($doClean = true);
     // abstract protected function _getTemplateVars();
-
     /**
      * Save the generated config to the file specified in Magento config
      *
@@ -103,7 +94,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
         }
         return array(true, null);
     }
-
     /**
      * Get the full path for a given template filename
      *
@@ -114,7 +104,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             $extensionDir = Mage::getModuleDir('', 'Nexcessnet_Turpentine');
             return sprintf('%s/misc/%s', $extensionDir, $baseFilename);
     }
-
     /**
      * Get the name of the file to save the VCL to
      *
@@ -125,7 +114,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             Mage::getStoreConfig('turpentine_varnish/servers/config_file'),
             array('root_dir' => Mage::getBaseDir()) );
     }
-
     /**
      * Get the name of the custom include VCL file
      *
@@ -138,8 +126,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             Mage::getStoreConfig('turpentine_varnish/servers/'.$key),
             array('root_dir' => Mage::getBaseDir()) );
     }
-
-
     /**
      * Get the custom VCL template, if it exists
      * Returns 'null' if the file doesn't exist
@@ -153,8 +139,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
         );
         if (is_file($filePath)) { return $filePath; } else { return null; }
     }
-
-
     /**
      * Format a template string, replacing {{keys}} with the appropriate values
      * and remove unspecified keys
@@ -171,7 +155,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
         return preg_replace('~{{[^}]+}}~', '',
             str_replace($needles, $replacements, $template));
     }
-
     /**
      * Format a VCL subroutine call
      *
@@ -181,7 +164,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
     protected function _vcl_call($subroutine) {
         return sprintf('call %s;', $subroutine);
     }
-
     /**
      * Get the Magento admin frontname
      *
@@ -202,7 +184,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
                 'admin/routers/adminhtml/args/frontName' );
         }
     }
-
     /**
      * Get the hostname for host normalization from Magento's base URL
      *
@@ -222,7 +203,6 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
             }
         }
     }
-
     /**
      * Get hosts as regex
      *
@@ -236,13 +216,10 @@ abstract class Nexcessnet_Turpentine_Model_Varnish_Configurator_Abstract {
         foreach (Mage::app()->getStores() as $store) {
             $hosts[] = parse_url($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, false), PHP_URL_HOST);
         }
-
         $hosts = array_values(array_unique($hosts));
-
         $pattern = '('.implode('|', array_map("preg_quote", $hosts)).')';
         return $pattern;
     }
-
     /**
      * Get the Host normalization sub routine
      *
@@ -258,7 +235,6 @@ EOS;
         return $this->_formatTemplate($tpl, array(
             'allowed_hosts_regex' => $this->getAllowedHostsRegex() ));
     }
-
     /**
      * Get the base url path regex
      *
@@ -273,7 +249,6 @@ EOS;
             array_map(create_function('$x', 'return preg_quote($x,"|");'),
                 $this->_getBaseUrlPaths())));
     }
-
     /**
      * Get the path part of each store's base URL and static file URLs
      *
@@ -298,7 +273,6 @@ EOS;
             'return strlen( $b ) - strlen( $a );'));
         return array_values($paths);
     }
-
     /**
      * Format the URL exclusions for insertion in a regex. Admin frontname and
      * API are automatically added.
@@ -310,7 +284,6 @@ EOS;
         return implode('|', array_merge(array($this->_getAdminFrontname(), 'api'),
             Mage::helper('turpentine/data')->cleanExplode(PHP_EOL, $urls)));
     }
-
     /**
      * Get the default cache TTL from Magento config
      *
@@ -319,7 +292,6 @@ EOS;
     protected function _getDefaultTtl() {
         return Mage::helper('turpentine/varnish')->getDefaultTtl();
     }
-
     /**
      * Get the default backend configuration string
      *
@@ -340,7 +312,6 @@ EOS;
                 $default_options);
         }
     }
-
     /**
      * Get the admin backend configuration string
      *
@@ -361,7 +332,6 @@ EOS;
                 $admin_options);
         }
     }
-
     /**
      * Get the grace period for vcl_fetch
      *
@@ -373,7 +343,6 @@ EOS;
     protected function _getGracePeriod() {
         return Mage::getStoreConfig('turpentine_vcl/ttls/grace_period');
     }
-
     /**
      * Get whether debug headers should be enabled or not
      *
@@ -383,7 +352,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_varnish/general/varnish_debug')
             ? 'true' : 'false';
     }
-
     /**
      * Format the GET variable excludes for insertion in a regex
      *
@@ -393,7 +361,6 @@ EOS;
         return implode('|', Mage::helper('turpentine/data')->cleanExplode(',',
             Mage::getStoreConfig('turpentine_vcl/params/get_params')));
     }
-
     protected function _getIgnoreGetParameters()
     {
         /** @var Nexcessnet_Turpentine_Helper_Data $helper */
@@ -401,7 +368,6 @@ EOS;
         $ignoredParameters = $helper->cleanExplode(',', Mage::getStoreConfig('turpentine_vcl/params/ignore_get_params'));
         return implode('|', $ignoredParameters);
     }
-
     /**
      * @return boolean
      */
@@ -409,7 +375,6 @@ EOS;
     {
         return Mage::getStoreConfigFlag('turpentine_vcl/params/transfer_unmodified_url');
     }
-
     /**
      * Get the Generate Session
      *
@@ -419,7 +384,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_varnish/general/vcl_fix')
             ? '/* -- REMOVED' : '';
     }
-
     /**
      * Get the Generate Session
      *
@@ -429,8 +393,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_varnish/general/vcl_fix')
             ? '-- */' : '';
     }
-
-
     /**
      * Get the Generate Session
      *
@@ -440,8 +402,6 @@ EOS;
         return Mage::getStoreConfigFlag('turpentine_varnish/general/vcl_fix')
             ? 'return (pipe);' : 'call generate_session;';
     }
-
-
     /**
      * Get the Generate Session Expires
      *
@@ -451,7 +411,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_varnish/general/vcl_fix')
             ? '# call generate_session_expires' : 'call generate_session_expires;';
     }
-
     /**
      * Get the Force Static Caching option
      *
@@ -461,7 +420,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_vcl/static/force_static')
             ? 'true' : 'false';
     }
-
     /**
      * Get the Force Static Caching option
      *
@@ -471,7 +429,6 @@ EOS;
         return Mage::getStoreConfig('turpentine_vcl/static/simple_hash')
             ? 'true' : 'false';
     }
-
     /**
      * Format the list of static cache extensions
      *
@@ -481,7 +438,6 @@ EOS;
         return implode('|', Mage::helper('turpentine/data')->cleanExplode(',',
             Mage::getStoreConfig('turpentine_vcl/static/exts')));
     }
-
     /**
      * Get the static caching TTL
      *
@@ -490,7 +446,6 @@ EOS;
     protected function _getStaticTtl() {
         return Mage::getStoreConfig('turpentine_vcl/ttls/static_ttl');
     }
-
     /**
      * Format the by-url TTL value list
      *
@@ -517,7 +472,6 @@ EOS;
         }
         return $str;
     }
-
     /**
      * Get the Enable Caching value
      *
@@ -527,7 +481,6 @@ EOS;
         return Mage::helper('turpentine/varnish')->getVarnishEnabled() ?
             'true' : 'false';
     }
-
     /**
      * Get the list of allowed debug IPs
      *
@@ -537,7 +490,6 @@ EOS;
         return Mage::helper('turpentine/data')->cleanExplode(',',
             Mage::getStoreConfig('dev/restrict/allow_ips'));
     }
-
     /**
      * Get the list of crawler IPs
      *
@@ -547,7 +499,6 @@ EOS;
         return Mage::helper('turpentine/data')->cleanExplode(',',
             Mage::getStoreConfig('turpentine_vcl/backend/crawlers'));
     }
-
     /**
      * Get the regex formatted list of crawler user agents
      *
@@ -559,7 +510,6 @@ EOS;
                 Mage::getStoreConfig(
                     'turpentine_vcl/backend/crawler_user_agents' )));
     }
-
     /**
      * Get the time to increase a cached objects TTL on cache hit (in seconds).
      *
@@ -570,7 +520,6 @@ EOS;
     protected function _getLruFactor() {
         return Mage::getStoreConfig('turpentine_vcl/ttls/lru_factor');
     }
-
     /**
      * Get the advanced session validation restrictions
      *
@@ -598,7 +547,6 @@ EOS;
         }
         return $validation;
     }
-
     /**
      * Remove empty and commented out lines from the generated VCL
      *
@@ -614,7 +562,6 @@ EOS;
             )
         );
     }
-
     /**
      * Helper to filter out blank/commented lines for VCL cleaning
      *
@@ -627,7 +574,6 @@ EOS;
             substr($line, 0, 2) != '//') ||
             substr($line, 0, 8) == '#include');
     }
-
     /**
      * Format a VCL backend declaration
      *
@@ -642,7 +588,6 @@ EOS;
 backend {{name}} {
     .host = "{{host}}";
     .port = "{{port}}";
-
 EOS;
         $vars = array(
             'host'  => $host,
@@ -656,7 +601,6 @@ EOS;
         $str .= '}'.PHP_EOL;
         return $str;
     }
-
     /**
      * Format a VCL director declaration, for load balancing
      *
@@ -674,17 +618,25 @@ EOS;
             $backendNodes = Mage::helper('turpentine/data')->cleanExplode(PHP_EOL,
                 Mage::getStoreConfig('turpentine_vcl/backend/backend_nodes_admin'));
             $probeUrl = Mage::getStoreConfig('turpentine_vcl/backend/backend_probe_url_admin');
+            $prefix = 'admin';
         } else {
             $backendNodes = Mage::helper('turpentine/data')->cleanExplode(PHP_EOL,
                 Mage::getStoreConfig('turpentine_vcl/backend/backend_nodes'));
             $probeUrl = Mage::getStoreConfig('turpentine_vcl/backend/backend_probe_url');
+            if ('admin' == $name) {
+                $prefix = 'admin';
+            } else {
+                $prefix = '';
+            }
         }
         $backends = '';
+		$number = 0;
         foreach ($backendNodes as $backendNode) {
             $parts = explode(':', $backendNode, 2);
             $host = (empty($parts[0])) ? '127.0.0.1' : $parts[0];
             $port = (empty($parts[1])) ? '80' : $parts[1];
-            $backends .= $this->_vcl_director_backend($host, $port, $probeUrl, $backendOptions);
+            $backends .= $this->_vcl_director_backend($host, $port, $prefix.$number, $probeUrl, $backendOptions);
+			$number++;
         }
         $vars = array(
             'name' => $name,
@@ -692,24 +644,23 @@ EOS;
         );
         return $this->_formatTemplate($tpl, $vars);
     }
-
     /**
      * Format a VCL backend declaration to put inside director
      *
      * @param string $host     backend host
      * @param string $port     backend port
+	 * @param string $descriptor backend descriptor
      * @param string $probeUrl URL to check if backend is up
      * @param array  $options  extra options for backend
      * @return string
      */
-    protected function _vcl_director_backend($host, $port, $probeUrl = '', $options = array()) {
+    protected function _vcl_director_backend($host, $port, $descriptor = '', $probeUrl = '', $options = array()) {
         $tpl = <<<EOS
     {
-        .backend = {
+        .backend {$descriptor} = {
             .host = "{{host}}";
             .port = "{{port}}";
 {{probe}}
-
 EOS;
         $vars = array(
             'host'  => $host,
@@ -729,7 +680,6 @@ EOS;
 EOS;
         return $str;
     }
-
     /**
      * Format a VCL probe declaration to put in backend which is in director
      *
@@ -757,7 +707,6 @@ EOS;
             return $this->_formatTemplate($tpl, $vars);
         }
     }
-
     /**
      * Format a VCL ACL declaration
      *
@@ -778,7 +727,6 @@ EOS;
         );
         return $this->_formatTemplate($tpl, $vars);
     }
-
     /**
      * Get the User-Agent normalization sub routine
      *
@@ -830,7 +778,6 @@ EOS;
 
         return $tpl;
     }
-
     /**
      * Get the Accept-Encoding normalization sub routine
      *
@@ -848,11 +795,9 @@ if (req.http.Accept-Encoding) {
             unset req.http.Accept-Encoding;
         }
     }
-
 EOS;
         return $tpl;
     }
-
     /**
      * Get the Host normalization sub routine
      *
@@ -861,12 +806,10 @@ EOS;
     protected function _vcl_sub_normalize_host() {
         $tpl = <<<EOS
 set req.http.Host = "{{normalize_host_target}}";
-
 EOS;
         return $this->_formatTemplate($tpl, array(
             'normalize_host_target' => $this->_getNormalizeHostTarget() ));
     }
-
     /**
      * Get the hostname for cookie normalization
      *
@@ -876,7 +819,6 @@ EOS;
         return trim(Mage::getStoreConfig(
             'turpentine_vcl/normalization/cookie_target' ));
     }
-
     /**
      * Get the regex for cookie normalization
      *
@@ -886,7 +828,6 @@ EOS;
         return trim(Mage::getStoreConfig(
             'turpentine_vcl/normalization/cookie_regex' ));
     }
-
     /**
      * Get the regex for mobile user agent
      *
@@ -946,7 +887,6 @@ EOS;
         if (( ! $this->_getDebugIps()) || ! Mage::getStoreConfig('turpentine_vcl/maintenance/custom_vcl_synth')) {
             return false;
         }
-
         switch (Mage::getStoreConfig('turpentine_varnish/servers/version')) {
             case 4.0:
             case 4.1:
@@ -961,7 +901,6 @@ else {
         return (synth(999, "Maintenance mode"));
     }
 }
-
 EOS;
                 break;
             default:
@@ -977,11 +916,9 @@ if (req.http.X-Forwarded-For) {
 }
 EOS;
         }
-
         return $this->_formatTemplate($tpl, array(
             'debug_ips' => Mage::getStoreConfig('dev/restrict/allow_ips') ));
     }
-
     /**
      * When using Varnish on port 80 and Hitch listen on port 443 for HTTPS, the fix will set X-Forwarded-Proto to HTTPS to prevent redirect loop.
      *
@@ -995,37 +932,56 @@ if (std.port(server.ip) == 443) {
 EOS;
         return $tpl;
     }
-
     /**
      * When using Varnish as front door listen on port 80 and Nginx/Apache listen on port 443 for HTTPS, the fix will keep the url parameters when redirect from HTTP to HTTPS.
      *
      * @return string
      */
     protected function _vcl_sub_https_redirect_fix() {
-        $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-        $baseUrl = str_replace(array('http://', 'https://'), '', $baseUrl);
-        $baseUrl = rtrim($baseUrl, '/');
-
+        $hostRegex = array();
+        foreach ($this->_getHostNames() as $host) {
+            $hostRegex[] = 'req.http.host ~ "^(?i)'.$host.'"';
+        }
+        $hostRegex = implode(' || ', $hostRegex);
         switch (Mage::getStoreConfig('turpentine_varnish/servers/version')) {
             case 4.0:
             case 4.1:
                 $tpl = <<<EOS
-if ( (req.http.host ~ "^(?i)www.$baseUrl" || req.http.host ~ "^(?i)$baseUrl") && req.http.X-Forwarded-Proto !~ "(?i)https") {
+if ( ($hostRegex) && req.http.X-Forwarded-Proto !~ "(?i)https") {
         return (synth(750, ""));
     }
 EOS;
                 break;
             default:
                 $tpl = <<<EOS
-if ( (req.http.host ~ "^(?i)www.$baseUrl" || req.http.host ~ "^(?i)$baseUrl") && req.http.X-Forwarded-Proto !~ "(?i)https") {
+if ( ($hostRegex) && req.http.X-Forwarded-Proto !~ "(?i)https") {
         error 750 "https://" + req.http.host + req.url;
     }
 EOS;
         }
-
         return $tpl;
     }
-
+    protected function _getHostNames() {
+        $baseUrl = $this->_stripHost(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB));
+        $hosts = array(
+            $baseUrl => $baseUrl
+        );
+        foreach (Mage::app()->getWebsites() as $website) {
+            foreach ($website->getGroups() as $group) {
+                $stores = $group->getStores();
+                foreach ($stores as $store) {
+                    $baseUrl = $this->_stripHost(Mage::getStoreConfig('web/unsecure/base_url', $store->getId()));
+                    $secureBaseUrl = $this->_stripHost(Mage::getStoreConfig('web/secure/base_url', $store->getId()));
+                    $hosts[$baseUrl] = $baseUrl;
+                    $hosts[$secureBaseUrl] = $secureBaseUrl;
+                }
+            }
+        }
+        return $hosts;
+    }
+    protected function _stripHost ($baseUrl){
+        return  rtrim(str_replace(array('http://', 'https://'), '', $baseUrl), '/');
+    }
     /**
      * Get the allowed IPs when in maintenance mode
      *
@@ -1036,21 +992,19 @@ EOS;
         if (( ! $this->_getDebugIps()) || ! Mage::getStoreConfig('turpentine_vcl/maintenance/custom_vcl_synth')) {
             return false;
         }
-
         switch (Mage::getStoreConfig('turpentine_varnish/servers/version')) {
             case 4.0:
             case 4.1:
                 $tpl = <<<EOS
 sub vcl_synth {
     if (resp.status == 999) {
-        set resp.status = 404;
+        set resp.status = 503;
         set resp.http.Content-Type = "text/html; charset=utf-8";
         synthetic({"{{vcl_synth_content}}"});
         return (deliver);
     }
     return (deliver);
 }
-
 EOS;
                 break;
             default:
@@ -1062,11 +1016,9 @@ sub vcl_error {
 }
 EOS;
         }
-
         return $this->_formatTemplate($tpl, array(
             'vcl_synth_content' => Mage::getStoreConfig('turpentine_vcl/maintenance/custom_vcl_synth')));
     }
-
     /**
      * vcl_synth for fixing https
      *
@@ -1075,7 +1027,6 @@ EOS;
     protected function _vcl_sub_synth_https_fix()
     {
         $tpl = $this->_vcl_sub_synth();
-
         if ( ! $tpl) {
             $tpl = <<<EOS
 sub vcl_synth {
@@ -1094,14 +1045,47 @@ sub vcl_synth {
         set resp.http.Location = "https://" + req.http.host + req.url;
         return(deliver);
     }';
-
         $tpl = str_ireplace('sub vcl_synth {', $tpl_750, $tpl);
         }
-
         return $tpl;
     }
-
-
+  
+    /**
+     * Get VCL for fixing cookie domain
+     *
+     * @return string
+     */
+    protected function _vcl_sub_set_cookie_domain()
+    {
+        $tpl = '';
+        /** @var Mage_Core_Model_Store $store */
+        $domain2cookie = array();
+        foreach (Mage::app()->getStores() as $store) {
+            $cookieDomain = $store->getConfig(Mage_Core_Model_Cookie::XML_PATH_COOKIE_DOMAIN);
+            if (!$cookieDomain) {
+                continue;
+            }
+            $urlDomainUnsecure = parse_url($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, false), PHP_URL_HOST);
+            $urlDomainSecure = parse_url($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, true), PHP_URL_HOST);
+            if ($urlDomainUnsecure && $urlDomainUnsecure != $cookieDomain) {
+                $domain2cookie[$urlDomainUnsecure] = $cookieDomain;
+            }
+            if ($urlDomainSecure && $urlDomainSecure != $cookieDomain) {
+                $domain2cookie[$urlDomainSecure] = $cookieDomain;
+            }
+        }
+        $count = 0;
+        foreach ($domain2cookie as $domain => $cookieDomain) {
+            $if = ($count == 0) ? '                    if' : ' elsif';
+            $tpl .= <<<EOS
+$if (resp.http.X-Varnish-CookieDomain == "$domain") {
+                        set resp.http.X-Varnish-CookieDomain = "$cookieDomain";
+                    }
+EOS;
+            $count++;
+        }
+        return $tpl;
+    }
 
     /**
      * Build the list of template variables to apply to the VCL template
@@ -1152,12 +1136,11 @@ sub vcl_synth {
                 $this->_getVclTemplateFilename(self::VCL_CUSTOM_C_CODE_FILE) ),
             'esi_private_ttl'   => Mage::helper('turpentine/esi')
                 ->getDefaultEsiTtl(),
+            'set_cookie_domain' => $this->_vcl_sub_set_cookie_domain(),
         );
-
         if ((bool) Mage::getStoreConfig('turpentine_vcl/urls/bypass_cache_store_url')) {
             $vars['allowed_hosts'] = $this->_vcl_sub_allowed_hosts_regex();
         }
-
         if (Mage::getStoreConfig('turpentine_vcl/normalization/encoding')) {
             $vars['normalize_encoding'] = $this->_vcl_sub_normalize_encoding();
         }
@@ -1173,7 +1156,6 @@ sub vcl_synth {
         if (Mage::getStoreConfig('turpentine_vcl/normalization/cookie_target')) {
             $vars['normalize_cookie_target'] = $this->_getNormalizeCookieTarget();
         }
-
         if (Mage::getStoreConfig('turpentine_vcl/maintenance/enable')) {
             // in vcl_recv set the allowed IPs otherwise load the vcl_error (v3)/vcl_synth (v4)
             $vars['maintenance_allowed_ips'] = $this->_vcl_sub_maintenance_allowed_ips();
@@ -1189,7 +1171,6 @@ sub vcl_synth {
                 $vars['vcl_synth'] = $this->_vcl_sub_synth_https_fix();
             }
         }
-
         foreach (array('', 'top') as $position) {
             $customIncludeFile = $this->_getCustomIncludeFilename($position);
             if (is_readable($customIncludeFile)) {
@@ -1198,7 +1179,6 @@ sub vcl_synth {
                 $vars[$key] = file_get_contents($customIncludeFile);
             }
         }
-
         return $vars;
     }
 }
