@@ -733,17 +733,49 @@ EOS;
      * @return string
      */
     protected function _vcl_sub_normalize_user_agent() {
-        /**
-         * Mobile regex from
-         * @link http://magebase.com/magento-tutorials/magento-design-exceptions-explained/
-         */
+
+        $mobileRegexp = $this->_getMobileUserAgentRegex();
+		$additionalUserAgentRegexp = $this->_getAdditionalUserAgentRegex();
+		$additionalUserAgentName = $this->_getAdditionalUserAgentName();
+		$additionalUserAgent2Regexp = $this->_getAdditionalUserAgent2Regex();
+		$additionalUserAgent2Name = $this->_getAdditionalUserAgent2Name();
         $tpl = <<<EOS
-if (req.http.User-Agent ~ "iP(?:hone|ad|od)|BlackBerry|Palm|Googlebot-Mobile|Mobile|mobile|mobi|Windows Mobile|Safari Mobile|Android|Opera (?:Mini|Mobi)") {
-        set req.http.X-Normalized-User-Agent = "mobile";
-    } else {
-        set req.http.X-Normalized-User-Agent = "other";
-    }
+set req.http.X-Normalized-User-Agent = "other";
 EOS;
+        if(!empty($mobileRegexp)){
+            $tplContent = '
+            if (req.http.User-Agent ~ "'.$mobileRegexp.'") {
+        set req.http.X-Normalized-User-Agent = "mobile";
+    }';
+
+            $tpl .= <<<"EOS"
+$tplContent
+EOS;
+
+        }
+		if(!empty($additionalUserAgentRegexp)){
+			$tplContent = '
+            if (req.http.User-Agent ~ "'.$additionalUserAgentRegexp.'") {
+        set req.http.X-Normalized-User-Agent = "'.$additionalUserAgentName.'";
+    }';
+
+			$tpl .= <<<"EOS"
+$tplContent
+EOS;
+
+		}
+		if(!empty($additionalUserAgent2Regexp)){
+			$tplContent = '
+            if (req.http.User-Agent ~ "'.$additionalUserAgent2Regexp.'") {
+        set req.http.X-Normalized-User-Agent = "'.$additionalUserAgent2Name.'";
+    }';
+
+			$tpl .= <<<"EOS"
+$tplContent
+EOS;
+
+		}
+
         return $tpl;
     }
     /**
@@ -796,6 +828,56 @@ EOS;
         return trim(Mage::getStoreConfig(
             'turpentine_vcl/normalization/cookie_regex' ));
     }
+    /**
+     * Get the regex for mobile user agent
+     *
+     * @return string
+     */
+    protected function _getMobileUserAgentRegex() {
+        return trim(Mage::getStoreConfig(
+            'turpentine_vcl/normalization/user_agent_mobile_regexp' ));
+    }
+
+	/**
+	 * Get the regex for additional user agent
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgentRegex() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional_regexp' ));
+	}
+
+	/**
+	 * Get the regex for additional user agent name
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgentName() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional_name' ));
+	}
+
+	/**
+	 * Get the regex for additional2 user agent
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgent2Regex() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional2_regexp' ));
+	}
+
+	/**
+	 * Get the regex for additional2 user agent name
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgent2Name() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional2_name' ));
+	}
+
     /**
      * Get the allowed IPs when in maintenance mode
      *
@@ -1083,7 +1165,6 @@ EOS;
         if (Mage::getStoreConfig('turpentine_varnish/general/https_proto_fix')) {
             $vars['https_proto_fix'] = $this->_vcl_sub_https_proto_fix();
         }
-        
         if (Mage::getStoreConfig('turpentine_varnish/general/https_redirect_fix')) {
             $vars['https_redirect'] = $this->_vcl_sub_https_redirect_fix();
             if (Mage::getStoreConfig('turpentine_varnish/servers/version') == '4.0' || Mage::getStoreConfig('turpentine_varnish/servers/version') == '4.1') {
