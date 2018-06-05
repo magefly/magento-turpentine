@@ -788,7 +788,9 @@ EOS;
 
         $mobileRegexp = $this->_getMobileUserAgentRegex();
 		$additionalUserAgentRegexp = $this->_getAdditionalUserAgentRegex();
+		$additionalUserAgentName = $this->_getAdditionalUserAgentName();
 		$additionalUserAgent2Regexp = $this->_getAdditionalUserAgent2Regex();
+		$additionalUserAgent2Name = $this->_getAdditionalUserAgent2Name();
         $tpl = <<<EOS
 set req.http.X-Normalized-User-Agent = "other";
 EOS;
@@ -806,7 +808,7 @@ EOS;
 		if(!empty($additionalUserAgentRegexp)){
 			$tplContent = '
             if (req.http.User-Agent ~ "'.$additionalUserAgentRegexp.'") {
-        set req.http.X-Normalized-User-Agent = "mobile";
+        set req.http.X-Normalized-User-Agent = "'.$additionalUserAgentName.'";
     }';
 
 			$tpl .= <<<"EOS"
@@ -817,7 +819,7 @@ EOS;
 		if(!empty($additionalUserAgent2Regexp)){
 			$tplContent = '
             if (req.http.User-Agent ~ "'.$additionalUserAgent2Regexp.'") {
-        set req.http.X-Normalized-User-Agent = "mobile";
+        set req.http.X-Normalized-User-Agent = "'.$additionalUserAgent2Name.'";
     }';
 
 			$tpl .= <<<"EOS"
@@ -906,6 +908,16 @@ EOS;
 	}
 
 	/**
+	 * Get the regex for additional user agent name
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgentName() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional_name' ));
+	}
+
+	/**
 	 * Get the regex for additional2 user agent
 	 *
 	 * @return string
@@ -913,6 +925,16 @@ EOS;
 	protected function _getAdditionalUserAgent2Regex() {
 		return trim(Mage::getStoreConfig(
 			'turpentine_vcl/normalization/user_agent_additional2_regexp' ));
+	}
+
+	/**
+	 * Get the regex for additional2 user agent name
+	 *
+	 * @return string
+	 */
+	protected function _getAdditionalUserAgent2Name() {
+		return trim(Mage::getStoreConfig(
+			'turpentine_vcl/normalization/user_agent_additional2_name' ));
 	}
 
     /**
